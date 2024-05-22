@@ -1,9 +1,9 @@
 # import dataset
 
-df <- read.csv('C:/Users/saius/Documents/SL_project/DatasetR_eng_fin.csv', header=TRUE, sep=';', 
+df <- read.csv('DatasetR_eng_fin.csv', header=TRUE, sep=';', 
                fileEncoding="UTF-8")
 
-anyNA(df)
+anyNA(df) # check missing values
 
 # create a new column that identifies matches from the "winner - 1" and "control - 0" groups
 df$Group <- ifelse(grepl("Ca", df$ID), "1",
@@ -71,3 +71,5 @@ P_cont <- round(cor(df_control), 4)
 heatmap(x = P_win, col = col, symm = TRUE, main = 'P_win')
 heatmap(x = P_cont, col = col, symm = TRUE, main = 'P_cont')
 
+
+save(df, file = '/Users/nico/Desktop/football_data_/processed_data.RData')
