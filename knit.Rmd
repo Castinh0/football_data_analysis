@@ -53,7 +53,7 @@ that best suited these criteria and will thus be included in the final
 dataset are:
 
 | Variable                | Variable name  | Explanation                                                                                              |
-|------------------------|------------------------|------------------------|
+|-------------------------|----------------|----------------------------------------------------------------------------------------------------------|
 | Field advantage         | FieldAdvantage | valued H for "Home", or A for "Away"                                                                     |
 | Possession              | BallPoss       | expressed as a percentage                                                                                |
 | Attempted passages      | PassAtt        |                                                                                                          |
