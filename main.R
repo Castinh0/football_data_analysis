@@ -1,8 +1,7 @@
 # import dataset
-
+#rm(list=ls())
 df <- read.csv('DatasetR_eng_fin.csv', header=TRUE, sep=';', 
                fileEncoding="UTF-8")
-
 anyNA(df) # check missing values
 
 # nick: Meaningful variables can be (based on the 'research' question):
@@ -14,119 +13,455 @@ anyNA(df) # check missing values
 
 # nick: check if variable need standardization/normalization
 str(df)       # Class of the dataframe
-# Example: Preprocessing percentage variables
+
+
+# Trasformare FieldAdvantage in variabile binaria
+df$FieldAdvantage <- ifelse(df$FieldAdvantage == "H", 1, 
+                            ifelse(df$FieldAdvantage == "A", 0, NA))
+
+
+summary(df)
+
 df$BallPoss <- as.numeric(gsub("%", "", gsub(",", ".", df$BallPoss))) / 100
 df$ShotsPrec <- as.numeric(gsub("%", "", gsub(",", ".", df$ShotsPrec))) / 100
 df$PassPrec <- as.numeric(gsub("%", "", gsub(",", ".", df$PassPrec))) / 100
 df$TacklesWRatio <- as.numeric(gsub("%", "", gsub(",", ".", df$TacklesWRatio))) / 100
 df$AirDuelW <- as.numeric(gsub("%", "", gsub(",", ".", df$AirDuelW))) / 100
 df$DribWRatio <- as.numeric(gsub("%", "", gsub(",", ".", df$DribWRatio))) / 100
+df$Knowledge <- as.numeric(gsub(",","", df$Knowledge))
+summary(df)
 
-# Encoding FieldAdvantage
-df$FieldAdvantage <- ifelse(df$FieldAdvantage == "H", 1, 
-                            ifelse(df$FieldAdvantage == "A", 0, NA))
+df1 <- df[, c("FieldAdvantage", "PointsWon", "GoalsMade", "GoalsTaken", "BallPoss", "Shots", "ShotsOnT",
+              "ShotsPrec", "PassAtt", "PassSucc", "PassPrec", "RosterQuality", "Knowledge", "YellowC", "RedC", 
+              "FoulsC", "FoulsT", "TacklesWRatio", "AirDuelW", "DribW", "DribAtt", "DribWRatio")]
 
-# Encoding OutcomeWL
-df$OutcomeWL <- ifelse(df$OutcomeWL == "W", 3, 
-                       ifelse(df$OutcomeWL == "D", 1, 
-                              ifelse(df$OutcomeWL == "L", 0, NA)))
+summary(df1)
 
-str(df)
+wins <- df1[df1$PointsWon == 3, ]
+defeats <- df1[df1$PointsWon == 0, ]
+draws <- df1[df1$PointsWon == 1, ]
 
+#############################################
+############# aggregate hists ###############
+#############################################
 
-par(mfrow=c(2, 2))  # Arrange plots in a 2x2 grid
-
-barplot(table(df$OutcomeWL), col = "skyblue", main = "OutcomeWL Bar Plot")
-barplot(table(df$FieldAdvantage), col = "skyblue", main = "FieldAdvantage Bar Plot")
-barplot(table(df$BallPoss), col = "skyblue", main = "BallPoss Bar Plot")
-barplot(table(df$Shots), col = "skyblue", main = "Shots Bar Plot")
-abline(v = mean(df$Shots), col = "red", lwd = 2)  # Add mean line
-par(mfrow=c(1, 1))
-
-par(mfrow=c(2, 2)) 
-hist(df$OutcomeWL, col = "skyblue", border = "black", main = "OutcomeWL Histogram")
-hist(df$FieldAdvantage, col = "skyblue", border = "black", main = "FieldAdvantage Histogram")
-abline(v = mean(df$OutcomeWL), col = "red", lwd = 2)  # Add mean line
-hist(df$BallPoss, col = "skyblue", border = "black", main = "BallPoss Histogram")
-abline(v = mean(df$BallPoss), col = "red", lwd = 2)  # Add mean line
-hist(df$Shots, col = "skyblue", border = "black", main = "Shots Histogram")
-abline(v = mean(df$Shots), col = "red", lwd = 2)  # Add mean line
-par(mfrow=c(1, 1))
-
-par(mfrow=c(2, 2))
-hist(df$ShotsOnT, col = "skyblue", border = "black", main = "ShotsOnT Histogram")
-abline(v = mean(df$ShotsOnT), col = "red", lwd = 2)  # Add mean line
-hist(df$ShotsPrec, col = "skyblue", border = "black", main = "ShotsPrec Histogram")
-abline(v = mean(df$ShotsPrec), col = "red", lwd = 2)  # Add mean line
-hist(df$PassAtt, col = "skyblue", border = "black", main = "PassAtt Histogram")
-abline(v = mean(df$PassAtt), col = "red", lwd = 2)  # Add mean line
-hist(df$PassSucc, col = "skyblue", border = "black", main = "PassSucc Histogram")
-abline(v = mean(df$PassSucc), col = "red", lwd = 2)  # Add mean line
-par(mfrow=c(1, 1))
-
-par(mfrow=c(2, 2))
-hist(df$PassPrec, col = "skyblue", border = "black", main = "PassPrec Histogram")
-abline(v = mean(df$PassPrec), col = "red", lwd = 2)  # Add mean line
-hist(df$TacklesW, col = "skyblue", border = "black", main = "TacklesW Histogram")
-abline(v = mean(df$TacklesW), col = "red", lwd = 2)  # Add mean line
-hist(df$TacklesAtt, col = "skyblue", border = "black", main = "TacklesAtt Histogram")
-abline(v = mean(df$TacklesAtt), col = "red", lwd = 2)  # Add mean line
-hist(df$AirDuelW, col = "skyblue", border = "black", main = "AirDuelW Histogram")
-abline(v = mean(df$AirDuelW), col = "red", lwd = 2)  # Add mean line
-par(mfrow=c(1, 1))
-# Reset graphics parameters
-par(mfrow=c(1, 1))  # Reset to default single plot layout
+barplot(table(df1$FieldAdvantage), col = "skyblue", main = "FieldAdvantage Bar Plot")
+abline(v = mean(df1$FieldAdvantage), col = "red", lwd = 2)  
+barplot(table(df1$PointsWon), col = "skyblue", main = "PointsWon Bar Plot")
+abline(v = mean(df1$PointsWon), col = "red", lwd = 2)  
+barplot(table(df1$GoalsMade), col = "skyblue", main = "GoalsMade Bar Plot")
+abline(v = mean(df1$GoalsMade), col = "red", lwd = 2)  
+barplot(table(df1$GoalsTaken), col = "skyblue", main = "GoalsTaken Bar Plot")
+abline(v = mean(df1$GoalsTaken), col = "red", lwd = 2)
+barplot(table(df1$YellowC), col = "skyblue", main = "YellowC Bar Plot")
+abline(v = mean(df1$YellowC), col = "red", lwd = 2)
 
 
-summary_df <- data.frame(
-  Variable = c("OutcomeWL", "FieldAdvantage", "BallPoss", "Shots", "ShotsOnT",
-               "PassAtt", "PassSucc", "TacklesW", "TacklesAtt", "AirDuelW", "DribW"),
-  Mean = sapply(df[, c("OutcomeWL", "FieldAdvantage", "BallPoss", "Shots", "ShotsOnT",
-                       "PassAtt", "PassSucc", "TacklesW", "TacklesAtt", "AirDuelW", "DribW")], mean),
-  Median = sapply(df[, c("OutcomeWL", "FieldAdvantage", "BallPoss", "Shots", "ShotsOnT",
-                         "PassAtt", "PassSucc", "TacklesW", "TacklesAtt", "AirDuelW", "DribW")], median),
-  SD = sapply(df[, c("OutcomeWL", "FieldAdvantage", "BallPoss", "Shots", "ShotsOnT",
-                     "PassAtt", "PassSucc", "TacklesW", "TacklesAtt", "AirDuelW", "DribW")], sd),
-  Min = sapply(df[, c("OutcomeWL", "FieldAdvantage", "BallPoss", "Shots", "ShotsOnT",
-                      "PassAtt", "PassSucc", "TacklesW", "TacklesAtt", "AirDuelW", "DribW")], min),
-  Max = sapply(df[, c("OutcomeWL", "FieldAdvantage", "BallPoss", "Shots", "ShotsOnT",
-                      "PassAtt", "PassSucc", "TacklesW", "TacklesAtt", "AirDuelW", "DribW")], max)
-)
-summary_df
+par(mfrow = c(2, 2))
+hist(df1$BallPoss, col = "skyblue", border = "black", main = "BallPoss Histogram")
+abline(v = mean(df1$BallPoss), col = "red", lwd = 2)
+hist(df1$Shots, col = "skyblue", border = "black", main = "Shots Histogram")
+abline(v = mean(df1$Shots), col = "red", lwd = 2)
+hist(df1$ShotsOnT, col = "skyblue", border = "black", main = "ShotsOnT Histogram")
+abline(v = mean(df1$ShotsOnT), col = "red", lwd = 2)
+hist(df1$ShotsPrec, col = "skyblue", border = "black", main = "ShotsPrec Histogram")
+abline(v = mean(df1$ShotsPrec), col = "red", lwd = 2)
+par(mfrow = c(1, 1))
+
+par(mfrow = c(2, 2))
+hist(df1$PassAtt, col = "skyblue", border = "black", main = "PassAtt Histogram")
+abline(v = mean(df1$PassAtt), col = "red", lwd = 2)
+hist(df1$PassSucc, col = "skyblue", border = "black", main = "PassSucc Histogram")
+abline(v = mean(df1$PassSucc), col = "red", lwd = 2)
+hist(df1$PassPrec, col = "skyblue", border = "black", main = "PassPrec Histogram")
+abline(v = mean(df1$PassPrec), col = "red", lwd = 2)
+hist(df1$RosterQuality, col = "skyblue", border = "black", main = "RosterQuality Histogram")
+abline(v = mean(df1$RosterQuality), col = "red", lwd = 2)
+par(mfrow = c(1, 1))
+
+par(mfrow = c(2, 2))
+hist(df1$Knowledge, col = "skyblue", border = "black", main = "Knowledge Histogram") # not numeric
+abline(v = mean(df$Knowledge), col = "red", lwd = 2) 
+hist(df1$FoulsC, col = "skyblue", border = "black", main = "FoulsC Histogram")
+abline(v = mean(df1$FoulsC), col = "red", lwd = 2)
+hist(df1$FoulsT, col = "skyblue", border = "black", main = "FoulsT Histogram")
+abline(v = mean(df1$FoulsT), col = "red", lwd = 2)
+hist(df1$TacklesWRatio, col = "skyblue", border = "black", main = "TacklesWRatio Histogram")
+abline(v = mean(df1$TacklesWRatio), col = "red", lwd = 2)
+par(mfrow = c(1, 1))
+
+par(mfrow = c(2, 2))
+hist(df1$AirDuelW, col = "skyblue", border = "black", main = "AirDuelW Histogram")
+abline(v = mean(df1$AirDuelW), col = "red", lwd = 2)
+hist(df1$DribW, col = "skyblue", border = "black", main = "DribW Histogram")
+abline(v = mean(df1$DribW), col = "red", lwd = 2)
+hist(df1$DribAtt, col = "skyblue", border = "black", main = "DribAtt Histogram")
+abline(v = mean(df1$DribAtt), col = "red", lwd = 2)
+hist(df1$DribWRatio, col = "skyblue", border = "black", main = "DribWRatio Histogram")
+abline(v = mean(df1$DribWRatio), col = "red", lwd = 2)
+par(mfrow = c(1, 1))
+
+#############################################
+############# match winners hists ###############
+#############################################
+
+barplot(table(wins$FieldAdvantage), col = "skyblue", main = "FieldAdvantage Bar Plot")
+abline(v = mean(wins$FieldAdvantage), col = "red", lwd = 2)  
+barplot(table(wins$PointsWon), col = "skyblue", main = "PointsWon Bar Plot")
+abline(v = mean(wins$PointsWon), col = "red", lwd = 2)  
+barplot(table(wins$GoalsMade), col = "skyblue", main = "GoalsMade Bar Plot")
+abline(v = mean(wins$GoalsMade), col = "red", lwd = 2)  
+barplot(table(wins$GoalsTaken), col = "skyblue", main = "GoalsTaken Bar Plot")
+abline(v = mean(wins$GoalsTaken), col = "red", lwd = 2)
+barplot(table(wins$YellowC), col = "skyblue", main = "YellowC Bar Plot")
+abline(v = mean(wins$YellowC), col = "red", lwd = 2)
+
+
+par(mfrow = c(2, 2))
+hist(wins$BallPoss, col = "skyblue", border = "black", main = "BallPoss Histogram")
+abline(v = mean(wins$BallPoss), col = "red", lwd = 2)
+hist(wins$Shots, col = "skyblue", border = "black", main = "Shots Histogram")
+abline(v = mean(wins$Shots), col = "red", lwd = 2)
+hist(wins$ShotsOnT, col = "skyblue", border = "black", main = "ShotsOnT Histogram")
+abline(v = mean(wins$ShotsOnT), col = "red", lwd = 2)
+hist(wins$ShotsPrec, col = "skyblue", border = "black", main = "ShotsPrec Histogram")
+abline(v = mean(wins$ShotsPrec), col = "red", lwd = 2)
+par(mfrow = c(1, 1))
+
+par(mfrow = c(2, 2))
+hist(wins$PassAtt, col = "skyblue", border = "black", main = "PassAtt Histogram")
+abline(v = mean(wins$PassAtt), col = "red", lwd = 2)
+hist(wins$PassSucc, col = "skyblue", border = "black", main = "PassSucc Histogram")
+abline(v = mean(wins$PassSucc), col = "red", lwd = 2)
+hist(wins$PassPrec, col = "skyblue", border = "black", main = "PassPrec Histogram")
+abline(v = mean(wins$PassPrec), col = "red", lwd = 2)
+hist(wins$RosterQuality, col = "skyblue", border = "black", main = "RosterQuality Histogram")
+abline(v = mean(wins$RosterQuality), col = "red", lwd = 2)
+par(mfrow = c(1, 1))
+
+par(mfrow = c(2, 2))
+hist(wins$Knowledge, col = "skyblue", border = "black", main = "Knowledge Histogram") # not numeric
+abline(v = mean(wins$Knowledge), col = "red", lwd = 2) 
+hist(wins$FoulsC, col = "skyblue", border = "black", main = "FoulsC Histogram")
+abline(v = mean(wins$FoulsC), col = "red", lwd = 2)
+hist(wins$FoulsT, col = "skyblue", border = "black", main = "FoulsT Histogram")
+abline(v = mean(wins$FoulsT), col = "red", lwd = 2)
+hist(wins$TacklesWRatio, col = "skyblue", border = "black", main = "TacklesWRatio Histogram")
+abline(v = mean(wins$TacklesWRatio), col = "red", lwd = 2)
+par(mfrow = c(1, 1))
+
+par(mfrow = c(2, 2))
+hist(wins$AirDuelW, col = "skyblue", border = "black", main = "AirDuelW Histogram")
+abline(v = mean(wins$AirDuelW), col = "red", lwd = 2)
+hist(wins$DribW, col = "skyblue", border = "black", main = "DribW Histogram")
+abline(v = mean(wins$DribW), col = "red", lwd = 2)
+hist(wins$DribAtt, col = "skyblue", border = "black", main = "DribAtt Histogram")
+abline(v = mean(wins$DribAtt), col = "red", lwd = 2)
+hist(wins$DribWRatio, col = "skyblue", border = "black", main = "DribWRatio Histogram")
+abline(v = mean(wins$DribWRatio), col = "red", lwd = 2)
+par(mfrow = c(1, 1))
+
+
+#############################################
+############# densities data ###############
+############# winners vs others (defeats+draws) ###############
+#############################################
+
+win_1 <- df1[df1$PointsWon==3, "FieldAdvantage"]
+win_0 <- df1[df1$PointsWon!=3, "FieldAdvantage"]
+
+plot(density(win_0), col = "blue", main = "Density Plot of FieldAdvantage")
+lines(density(win_1), col = "red")
+legend("topright", legend = c("Not win", "Win"), col = c("blue", "red"), lty = 1)
+
+
+win_1 <- df1[df1$PointsWon==3, "GoalsMade"]
+win_0 <- df1[df1$PointsWon!=3, "GoalsMade"]
+
+plot(density(win_0), col = "blue", main = "Density Plot of GoalsMade")
+lines(density(win_1), col = "red")
+legend("topright", legend = c("Not win", "Win"), col = c("blue", "red"), lty = 1)
+
+
+win_1 <- df1[df1$PointsWon==3, "GoalsTaken"]
+win_0 <- df1[df1$PointsWon!=3, "GoalsTaken"]
+
+plot(density(win_0), col = "blue", main = "Density Plot of GoalsTaken")
+lines(density(win_1), col = "red")
+legend("topright", legend = c("Not win", "Win"), col = c("blue", "red"), lty = 1)
+
+
+win_1 <- df1[df1$PointsWon==3, "BallPoss"]
+win_0 <- df1[df1$PointsWon!=3, "BallPoss"]
+
+plot(density(win_0), col = "blue", main = "Density Plot of BallPoss")
+lines(density(win_1), col = "red")
+legend("topright", legend = c("Not win", "Win"), col = c("blue", "red"), lty = 1)
+
+
+win_1 <- df1[df1$PointsWon==3, "Shots"]
+win_0 <- df1[df1$PointsWon!=3, "Shots"]
+
+plot(density(win_0), col = "blue", main = "Density Plot of Shots")
+lines(density(win_1), col = "red")
+legend("topright", legend = c("Not win", "Win"), col = c("blue", "red"), lty = 1)
+
+win_1 <- df1[df1$PointsWon==3, "ShotsOnT"]
+win_0 <- df1[df1$PointsWon!=3, "ShotsOnT"]
+
+plot(density(win_0), col = "blue", main = "Density Plot of ShotsOnT")
+lines(density(win_1), col = "red")
+legend("topright", legend = c("Not win", "Win"), col = c("blue", "red"), lty = 1)
+
+win_1 <- df1[df1$PointsWon==3, "ShotsPrec"]
+win_0 <- df1[df1$PointsWon!=3, "ShotsPrec"]
+
+plot(density(win_0), col = "blue", main = "Density Plot of ShotsPrec")
+lines(density(win_1), col = "red")
+legend("topright", legend = c("Not win", "Win"), col = c("blue", "red"), lty = 1)
+
+win_1 <- df1[df1$PointsWon==3, "PassAtt"]
+win_0 <- df1[df1$PointsWon!=3, "PassAtt"]
+
+plot(density(win_0), col = "blue", main = "Density Plot of PassAtt")
+lines(density(win_1), col = "red")
+legend("topright", legend = c("Not win", "Win"), col = c("blue", "red"), lty = 1)
+
+win_1 <- df1[df1$PointsWon==3, "PassSucc"]
+win_0 <- df1[df1$PointsWon!=3, "PassSucc"]
+
+plot(density(win_0), col = "blue", main = "Density Plot of PassSucc")
+lines(density(win_1), col = "red")
+legend("topright", legend = c("Not win", "Win"), col = c("blue", "red"), lty = 1)
+
+
+win_1 <- df1[df1$PointsWon==3, "PassPrec"]
+win_0 <- df1[df1$PointsWon!=3, "PassPrec"]
+
+plot(density(win_0), col = "blue", main = "Density Plot of PassPrec")
+lines(density(win_1), col = "red")
+legend("topright", legend = c("Not win", "Win"), col = c("blue", "red"), lty = 1)
+
+
+win_1 <- df1[df1$PointsWon==3, "RosterQuality"]
+win_0 <- df1[df1$PointsWon!=3, "RosterQuality"]
+
+plot(density(win_0), col = "blue", main = "Density Plot of RosterQuality")
+lines(density(win_1), col = "red")
+legend("topright", legend = c("Not win", "Win"), col = c("blue", "red"), lty = 1)
+
+win_1 <- df1[df1$PointsWon==3, "Knowledge"]
+win_0 <- df1[df1$PointsWon!=3, "Knowledge"]
+
+plot(density(win_0), col = "blue", main = "Density Plot of Knowledge")
+lines(density(win_1), col = "red")
+legend("topright", legend = c("Not win", "Win"), col = c("blue", "red"), lty = 1)
+
+win_1 <- df1[df1$PointsWon==3, "YellowC"]
+win_0 <- df1[df1$PointsWon!=3, "YellowC"]
+
+plot(density(win_0), col = "blue", main = "Density Plot of YellowC")
+lines(density(win_1), col = "red")
+legend("topright", legend = c("Not win", "Win"), col = c("blue", "red"), lty = 1)
+
+win_1 <- df1[df1$PointsWon==3, "RedC"]
+win_0 <- df1[df1$PointsWon!=3, "RedC"]
+
+plot(density(win_0), col = "blue", main = "Density Plot of RedC")
+lines(density(win_1), col = "red")
+legend("topright", legend = c("Not win", "Win"), col = c("blue", "red"), lty = 1)
+
+win_1 <- df1[df1$PointsWon==3, "FoulsC"]
+win_0 <- df1[df1$PointsWon!=3, "FoulsC"]
+
+plot(density(win_0), col = "blue", main = "Density Plot of FoulsC")
+lines(density(win_1), col = "red")
+legend("topright", legend = c("Not win", "Win"), col = c("blue", "red"), lty = 1)
+
+win_1 <- df1[df1$PointsWon==3, "FoulsT"]
+win_0 <- df1[df1$PointsWon!=3, "FoulsT"]
+
+plot(density(win_0), col = "blue", main = "Density Plot of FoulsT")
+lines(density(win_1), col = "red")
+legend("topright", legend = c("Not win", "Win"), col = c("blue", "red"), lty = 1)
+
+
+win_1 <- df1[df1$PointsWon==3, "AirDuelW"]
+win_0 <- df1[df1$PointsWon!=3, "AirDuelW"]
+
+plot(density(win_0), col = "blue", main = "Density Plot of AirDuelW")
+lines(density(win_1), col = "red")
+legend("topright", legend = c("Not win", "Win"), col = c("blue", "red"), lty = 1)
+
+
+win_1 <- df1[df1$PointsWon==3, "DribW"]
+win_0 <- df1[df1$PointsWon!=3, "DribW"]
+
+plot(density(win_0), col = "blue", main = "Density Plot of DribW")
+lines(density(win_1), col = "red")
+legend("topright", legend = c("Not win", "Win"), col = c("blue", "red"), lty = 1)
+
+
+win_1 <- df1[df1$PointsWon==3, "DribAtt"]
+win_0 <- df1[df1$PointsWon!=3, "DribAtt"]
+
+plot(density(win_0), col = "blue", main = "Density Plot of DribAtt")
+lines(density(win_1), col = "red")
+legend("topright", legend = c("Not win", "Win"), col = c("blue", "red"), lty = 1)
+
+
+
+win_1 <- df1[df1$PointsWon==3, "DribWRatio"]
+win_0 <- df1[df1$PointsWon!=3, "DribWRatio"]
+
+plot(density(win_0), col = "blue", main = "Density Plot of DribWRatio")
+lines(density(win_1), col = "red")
+legend("topright", legend = c("Not win", "Win"), col = c("blue", "red"), lty = 1)
 
 
 # Boxplots
-par(mfrow=c(2, 2))  # Arrange plots in a 4x3 grid
-boxplot(df$OutcomeWL, main = "OutcomeWL Boxplot")
-boxplot(df$FieldAdvantage, main = "OutcomeWL Boxplot")
-boxplot(df$BallPoss, main = "OutcomeWL Boxplot")
-boxplot(df$Shots, main = "OutcomeWL Boxplot")
+win_box <- df1[df1$PointsWon==3, ]
+not_win_box <- df1[df1$PointsWon!=3, ]
+
+
+par(mfrow=c(1, 2))  
+boxplot(win_box$FieldAdvantage, main = "FieldAdvantage Boxplot")
+boxplot(not_win_box$FieldAdvantage, main = "FieldAdvantage Boxplot")
 par(mfrow=c(1, 1))  
 
-par(mfrow=c(2, 2))  # Arrange plots in a 4x3 grid
-boxplot(df$ShotsOnT, main = "OutcomeWL Boxplot")
-boxplot(df$PassAtt, main = "OutcomeWL Boxplot")
-boxplot(df$PassSucc, main = "OutcomeWL Boxplot")
-boxplot(df$TacklesW, main = "OutcomeWL Boxplot")
-par(mfrow=c(1, 1))  
+par(mfrow=c(1, 2))  
+boxplot(win_box$PointsWon, main = "PointsWon Boxplot")
+boxplot(not_win_box$PointsWon, main = "PointsWon Boxplot")
+par(mfrow=c(1, 1))
 
-par(mfrow=c(2,2))
-boxplot(df$TacklesAtt, main = "OutcomeWL Boxplot")
-boxplot(df$AirDuelW, main = "OutcomeWL Boxplot")
-boxplot(df$DribW, main = "OutcomeWL Boxplot")
-par(mfrow=c(1, 1))  
+par(mfrow=c(1, 2))  
+boxplot(win_box$GoalsMade, main = "GoalsMade Boxplot")
+boxplot(not_win_box$GoalsMade, main = "GoalsMade Boxplot")
+par(mfrow=c(1, 1))
 
+par(mfrow=c(1, 2))
+boxplot(win_box$GoalsTaken, main = "GoalsTaken Boxplot")
+boxplot(not_win_box$GoalsTaken, main = "GoalsTaken Boxplot")
+par(mfrow=c(1, 1))
+
+par(mfrow=c(1, 2))
+boxplot(win_box$BallPoss, main = "BallPoss Boxplot")
+boxplot(not_win_box$BallPoss, main = "BallPoss Boxplot")
+par(mfrow=c(1, 1))
+
+par(mfrow=c(1, 2))
+boxplot(win_box$Shots, main = "Shots Boxplot")
+boxplot(not_win_box$Shots, main = "Shots Boxplot")
+par(mfrow=c(1, 1))
+
+par(mfrow=c(1, 2))
+boxplot(win_box$ShotsOnT, main = "ShotsOnT Boxplot")
+boxplot(not_win_box$ShotsOnT, main = "ShotsOnT Boxplot")
+par(mfrow=c(1, 1))
+
+par(mfrow=c(1, 2))
+boxplot(win_box$ShotsPrec, main = "ShotsPrec Boxplot")
+boxplot(not_win_box$ShotsPrec, main = "ShotsPrec Boxplot")
+par(mfrow=c(1, 1))
+
+par(mfrow=c(1, 2))
+boxplot(win_box$PassAtt, main = "PassAtt Boxplot")
+boxplot(not_win_box$PassAtt, main = "PassAtt Boxplot")
+par(mfrow=c(1, 1))
+
+par(mfrow=c(1, 2))
+boxplot(win_box$PassSucc, main = "PassSucc Boxplot")
+boxplot(not_win_box$PassSucc, main = "PassSucc Boxplot")
+par(mfrow=c(1, 1))
+
+par(mfrow=c(1, 2))
+boxplot(win_box$PassPrec, main = "PassPrec Boxplot")
+boxplot(not_win_box$PassPrec, main = "PassPrec Boxplot")
+par(mfrow=c(1, 1))
+
+par(mfrow=c(1, 2))
+boxplot(win_box$RosterQuality, main = "RosterQuality Boxplot")
+boxplot(not_win_box$RosterQuality, main = "RosterQuality Boxplot")
+par(mfrow=c(1, 1))
+
+par(mfrow=c(1, 2))
+boxplot(win_box$Knowledge, main = "Knowledge Boxplot")
+boxplot(not_win_box$Knowledge, main = "Knowledge Boxplot")
+par(mfrow=c(1, 1))
+
+par(mfrow=c(1, 2))
+boxplot(win_box$YellowC, main = "YellowC Boxplot")
+boxplot(not_win_box$YellowC, main = "YellowC Boxplot")
+par(mfrow=c(1, 1))
+
+par(mfrow=c(1, 2))
+boxplot(win_box$YellowC, main = "YellowC Boxplot")
+boxplot(not_win_box$YellowC, main = "YellowC Boxplot")
+par(mfrow=c(1, 1))
+
+par(mfrow=c(1, 2))
+boxplot(win_box$RedC, main = "RedC Boxplot")
+boxplot(not_win_box$RedC, main = "RedC Boxplot")
+par(mfrow=c(1, 1))
+
+par(mfrow=c(1, 2))
+boxplot(win_box$FoulsC, main = "FoulsC Boxplot")
+boxplot(not_win_box$FoulsC, main = "FoulsC Boxplot")
+par(mfrow=c(1, 1))
+
+par(mfrow=c(1, 2))
+boxplot(win_box$FoulsT, main = "FoulsT Boxplot")
+boxplot(not_win_box$FoulsT, main = "FoulsT Boxplot")
+par(mfrow=c(1, 1))
+
+par(mfrow=c(1, 2))
+boxplot(win_box$TacklesWRatio, main = "TacklesWRatio Boxplot")
+boxplot(not_win_box$TacklesWRatio, main = "TacklesWRatio Boxplot")
+par(mfrow=c(1, 1))
+
+par(mfrow=c(1, 2))
+boxplot(win_box$AirDuelW, main = "AirDuelW Boxplot")
+boxplot(not_win_box$AirDuelW, main = "AirDuelW Boxplot")
+par(mfrow=c(1, 1))
+
+par(mfrow=c(1, 2))
+boxplot(win_box$DribW, main = "DribW Boxplot")
+boxplot(not_win_box$DribW, main = "DribW Boxplot")
+par(mfrow=c(1, 1))
+
+par(mfrow=c(1, 2))
+boxplot(win_box$DribAtt, main = "DribAtt Boxplot")
+boxplot(not_win_box$DribAtt, main = "DribAtt Boxplot")
+par(mfrow=c(1, 1))
+
+par(mfrow=c(1, 2))
+boxplot(win_box$DribWRatio, main = "DribWRatio Boxplot")
+boxplot(not_win_box$DribWRatio, main = "DribWRatio Boxplot")
+par(mfrow=c(1, 1))
 
 # Correlation Analysis
-correlation_matrix <- cor(df[, c("OutcomeWL", "FieldAdvantage", "BallPoss", "Shots", "ShotsOnT",
-                                 "PassAtt", "PassSucc", "TacklesW", "TacklesAtt", "AirDuelW", "DribW")])
+correlation_matrix <- cor(df1)
 correlation_matrix
 
-heatmap(correlation_matrix, 
-        main = "Correlation Matrix",
-        xlab = "Variables",
-        ylab = "Variables",
-        col = colorRampPalette(c("blue", "white", "red"))(100))
+# Step 3: Define a Custom Red Color Palette
+red_palette <- colorRampPalette(c("white", "red"))(64)
+
+
+heatmap(correlation_matrix, Rowv = NA, Colv = NA, col = heat.colors(24), scale = "none", margins = c(5, 10))
+
+library(corrplot)
+
+selected_corr <- cor(df1)
+
+# Collinearity matrix
+corrplot(selected_corr,
+         method = "number",
+         diag = FALSE,
+         tl.cex = 0.8,
+         number.cex = 0.6,
+         tl.col = "black")
+
+
 
 # count the number of outliers
 # Define a function to count outliers using the IQR method
@@ -150,176 +485,11 @@ outlier_counts <- sapply(df, function(col) {
 # Display the counts of outliers for each variable
 print(outlier_counts)
 
-# from the hists, PassAtt and PassSucc look high varying on scale (standardization),
-# furthermore shots on target seems to has not relevant influence on the winning so i want try to normalize it.
-
-df$PassAtt_Standardized <- scale(df$PassAtt)
-df$PassSucc_Standardized <- scale(df$PassSucc)
-
-# Standardize and normalize ShotsOnT
-df$ShotsOnT_Standardized <- scale(df$ShotsOnT)
-df$ShotsOnT_Normalized <- (df$ShotsOnT_Standardized - min(df$ShotsOnT_Standardized)) / (max(df$ShotsOnT_Standardized) - min(df$ShotsOnT_Standardized))
-
-colnames(df)
-
-df_standardized <- df
-
-# Replace the original columns with their standardized versions
-df_standardized$PassAtt <- df$PassAtt_Standardized
-df_standardized$PassSucc <- df$PassSucc_Standardized
-df_standardized$ShotsOnT <- df$ShotsOnT_Normalized
 
 
 head(df)
 
-# let's now see the heat map with the standardized variables
 
-correlation_matrix_std <- cor(df_standardized[, c("OutcomeWL", "FieldAdvantage", "BallPoss", "Shots", "ShotsOnT_Standardized", "ShotsOnT_Normalized",
-                                 "PassAtt_Standardized", "PassSucc_Standardized", "TacklesW", "TacklesAtt", "AirDuelW", "DribW")])
-correlation_matrix_std
-
-heatmap(correlation_matrix_std, 
-        main = "Correlation Matrix",
-        xlab = "Variables",
-        ylab = "Variables",
-        col = colorRampPalette(c("blue", "white", "red"))(100))
-
-
-# Step 1: Extract prefix and number
-df$ID_Type <- substr(df$ID, 1, 4)
-df$ID_Number <- as.integer(substr(df$ID, 5, nchar(df$ID)))
-
-# Step 2: Calculate total points for each ID type
-total_points <- tapply(df$PointsWon, df$ID_Type, sum)
-
-# Step 3: Merge total points back into the original dataset
-df$Total_Points <- total_points[df$ID_Type]
-
-
-numeric_cols <- sapply(df, is.numeric)
-numeric_df <- df[, numeric_cols]
-
-cor_matrix <- cor(numeric_df)
-
-# Step 3: Define a Custom Red Color Palette
-red_palette <- colorRampPalette(c("white", "red"))(4)
-
-
-heatmap(cor_matrix, Rowv = NA, Colv = NA, col = red_palette, scale = "none", margins = c(5, 10))
-
-# Considerations:
-# total points have a strong correlation with: RoosterQuality (4 out of 4)
-# Total_Points is also correlated with: ShotsOnT, PassSucc, PassAtt, PassPrec, DribAtt, DribWin, BallPoss (3 out of 4)
-# It is obviously medium-high correlated (3 out of 4) with PointsWon, OutcomeWL but it is irrelevant
-# interesting to note that FieldAdvantage, Takles and Fouls (made and against) have small correlation 
-
-head(df)
-
-count_wins <- function(outcome_wl) {
-  return(sum(outcome_wl == 3))
-}
-
-# Extract the ID type from the ID column
-df$ID_type <- substr(df$ID, 1, 4)
-
-counts <- tapply(df$OutcomeWL, df$ID_type, count_wins)
-
-# Add the counts as a new variable to the dataframe
-df$wins <- counts[df$ID_type]
-
-tail(df)
-
-
-numeric_cols <- sapply(df, is.numeric)
-numeric_df <- df[, numeric_cols]
-
-cor_matrix <- cor(numeric_df)
-
-# Step 3: Define a Custom Red Color Palette
-red_palette <- colorRampPalette(c("white", "red"))(4)
-
-
-heatmap(cor_matrix, Rowv = NA, Colv = NA, col = red_palette, scale = "none", margins = c(5, 10))
-
-
-df$win <- ifelse(df$OutcomeWL == 3, 1, 0)
-
-head(df)
-
-# Split the data based on the win variable
-win_0 <- df[df$win == 0, "ShotsOnT_Normalized"]
-win_1 <- df[df$win == 1, "ShotsOnT_Normalized"]
-
-# Create a density plot for ShotsOnT
-plot(density(win_0), col = "blue", main = "Density Plot of ShotsOnT by Win")
-lines(density(win_1), col = "red")
-legend("topright", legend = c("win=0", "win=1"), col = c("blue", "red"), lty = 1)
-
-# Split the data based on the win variable
-win_0 <- df[df$win == 0, "BallPoss"]
-win_1 <- df[df$win == 1, "BallPoss"]
-
-# Create a density plot for BallPoss
-plot(density(win_0), col = "blue", main = "Density Plot of ShotsOnT by Win")
-lines(density(win_1), col = "red")
-legend("topright", legend = c("win=0", "win=1"), col = c("blue", "red"), lty = 1)
-
-# Split the data based on the win variable
-win_0 <- df[df$win == 0, "RosterQuality"]
-win_1 <- df[df$win == 1, "RosterQuality"]
-
-# Create a density plot for RosterQuality
-plot(density(win_0), col = "blue", main = "Density Plot of ShotsOnT by Win")
-lines(density(win_1), col = "red")
-legend("topright", legend = c("win=0", "win=1"), col = c("blue", "red"), lty = 1)
-
-# Normalization of RoasterQuality
-df$RosterQuality_std <- scale(df$RosterQuality)
-df$RosterQuality_norm <- (df$RosterQuality_std - min(df$RosterQuality_std)) / (max(df$RosterQuality_std) - min(df$RosterQuality_std))
-
-win_0 <- df[df$win == 0, "RosterQuality_norm"]
-win_1 <- df[df$win == 1, "RosterQuality_norm"]
-
-# Create a density plot for RosterQuality_norm
-plot(density(win_0), col = "blue", main = "Density Plot of ShotsOnT by Win")
-lines(density(win_1), col = "red")
-legend("topright", legend = c("win=0", "win=1"), col = c("blue", "red"), lty = 1)
-
-
-numeric_cols <- sapply(df, is.numeric)
-numeric_df <- df[, numeric_cols]
-
-cor_matrix <- cor(numeric_df)
-
-# Step 3: Define a Custom Red Color Palette
-red_palette <- colorRampPalette(c("white", "red"))(4)
-
-
-heatmap(cor_matrix, Rowv = NA, Colv = NA, col = red_palette, scale = "none", margins = c(5, 10))
-
-
-
-# Collinearity matrix
-library(corrplot)
-
-selected_vars <- c("FieldAdvantage", "OutcomeWL", "GoalsMade", "GoalsTaken", "BallPoss", "Shots", "ShotsPrec",
-                   "PassPrec", "Knowledge", "TacklesWRatio", "DribWRatio", "RosterQuality_std",
-                   "Total_Points", "wins", "win")
-
-numeric_cols <- selected_vars[sapply(selected_vars, function(var) is.numeric(df[[var]]))]
-selected_corr <- cor(df[, numeric_cols])
-
-corrplot(selected_corr,
-         method = "number",
-         diag = FALSE,
-         tl.cex = 0.8,
-         number.cex = 0.6,
-         tl.col = "black")
-
-
-str(df)
-
-head(df)
 
 # Single linear regressions
 cor(df$BallPoss, df$Shots)
