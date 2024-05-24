@@ -37,6 +37,98 @@ df1 <- df[, c("FieldAdvantage", "PointsWon", "GoalsMade", "GoalsTaken", "BallPos
 
 summary(df1)
 
+
+
+
+
+###############################################################
+## We can try to observe which variable is normally distributed
+###############################################################
+par(mfrow=c(2, 2))
+qqnorm(df1$FieldAdvantage)
+qqline(df1$FieldAdvantage, col = "red")
+
+qqnorm(df1$PointsWon)
+qqline(df1$PointsWon, col = "red")
+
+qqnorm(df1$GoalsMade)
+qqline(df1$GoalsMade, col = "red")
+
+qqnorm(df1$GoalsTaken)
+qqline(df1$GoalsTaken, col = "red")
+par(mfrow=c(1, 1))
+
+
+par(mfrow=c(2, 2))
+qqnorm(df1$BallPoss)
+qqline(df1$BallPoss, col = "red")
+
+qqnorm(df1$Shots)
+qqline(df1$Shots, col = "red")
+
+qqnorm(df1$ShotsOnT)
+qqline(df1$ShotsOnT, col = "red")
+
+qqnorm(df1$ShotsPrec)
+qqline(df1$ShotsPrec, col = "red")
+par(mfrow=c(1, 1))
+
+
+par(mfrow=c(2, 2))
+qqnorm(df1$PassAtt)
+qqline(df1$PassAtt, col = "red")
+
+qqnorm(df1$PassSucc)
+qqline(df1$PassSucc, col = "red")
+
+qqnorm(df1$PassPrec)
+qqline(df1$PassPrec, col = "red")
+
+qqnorm(df1$RosterQuality)
+qqline(df1$RosterQuality, col = "red")
+par(mfrow=c(1, 1))
+
+
+par(mfrow=c(2, 2))
+qqnorm(df1$Knowledge)
+qqline(df1$Knowledge, col = "red")
+
+qqnorm(df1$YellowC)
+qqline(df1$YellowC, col = "red")
+
+qqnorm(df1$RedC)
+qqline(df1$RedC, col = "red")
+
+qqnorm(df1$FoulsC)
+qqline(df1$FoulsC, col = "red")
+par(mfrow=c(1, 1))
+
+
+par(mfrow=c(2, 2))
+qqnorm(df1$FoulsT)
+qqline(df1$FoulsT, col = "red")
+
+qqnorm(df1$TacklesWRatio)
+qqline(df1$TacklesWRatio, col = "red")
+
+qqnorm(df1$AirDuelW)
+qqline(df1$AirDuelW, col = "red")
+
+qqnorm(df1$DribW)
+qqline(df1$DribW, col = "red")
+par(mfrow=c(1, 1))
+
+
+par(mfrow=c(2, 1))
+qqnorm(df1$DribAtt)
+qqline(df1$DribAtt, col = "red")
+
+qqnorm(df1$DribWRatio)
+qqline(df1$DribWRatio, col = "red")
+par(mfrow=c(1, 1))
+
+
+
 wins <- df1[df1$PointsWon == 3, ]
 defeats <- df1[df1$PointsWon == 0, ]
 draws <- df1[df1$PointsWon == 1, ]
@@ -439,6 +531,24 @@ boxplot(win_box$DribWRatio, main = "DribWRatio Boxplot")
 boxplot(not_win_box$DribWRatio, main = "DribWRatio Boxplot")
 par(mfrow=c(1, 1))
 
+############## Boxplot of 'winners' group vs 'not winners' (draw+defeats) ############
+
+# wins vs draws vs defeats
+boxplot(wins$GoalsMade, draws$GoalsMade, defeats$GoalsMade, names = c("Wins", "Draws", "Defeats"),
+        xlab = "Groups", ylab = "Goals Made"
+        )
+grid()
+
+# wins vs others
+boxplot(wins$GoalsMade, draws$GoalsMade+defeats$GoalsMade, names = c("Wins", "Draws+Defeats"),
+        xlab = "Groups", ylab = "Goals Made"
+)
+grid()
+
+
+
+
+
 # Correlation Analysis
 correlation_matrix <- cor(df1)
 correlation_matrix
@@ -458,9 +568,63 @@ corrplot(selected_corr,
          method = "number",
          diag = FALSE,
          tl.cex = 0.8,
-         number.cex = 0.6,
+         number.cex = 0.65,
          tl.col = "black")
 
+###### Visual check of variable correlation
+plot(df1$BallPoss, df1$PassAtt) # strong positive correlation
+plot(df1$GoalsMade, df1$ShotsPrec) # don't know how to interpret it (maybe due to a integer value vs percentage)
+########## scatterplot to understand it better:
+plot(df1$GoalsMade, df1$ShotsPrec,
+     main = "Scatterplot GoalsMade vs ShotsPrec",
+     xlab = "Goals Made",
+     ylab = "Shots Precision",
+     pch = 19, col = "darkorange", cex = 0.7)
+grid()
+
+plot(df1$BallPoss, df1$Shots) # slightly positive
+plot(df1$BallPoss, df1$PassSucc)# strong positive correlation
+
+plot(df1$Shots, df1$PassPrec) # positive? ----> scattplot
+plot(df1$Shots, df1$PassPrec,
+     main = "Scatterplot Shots vs PassPrec",
+     xlab = "Number of shots",
+     ylab = "Passage precision",
+     pch = 19, col = "darkorange", cex = 0.7)
+grid()
+
+plot(df1$ShotsOnT, df1$GoalsMade) #?
+plot(df1$GoalsMade, df1$ShotsOnT,
+     main = "GoalsMade Shots vs ShotsOnT",
+     xlab = "Goals made",
+     ylab = "Shots on target",
+     pch = 19, col = "darkorange", cex = 0.7)
+grid() ### With 10 shots on target i can expect from 2 to 3 goals
+
+plot(df1$FoulsC, df1$PassAtt) #?
+plot(df1$PassAtt, df1$FoulsC,
+     main = "Passages Attempted vs Fouls Committed",
+     xlab = "Attempted passeges",
+     ylab = "Fouls committed",
+     pch = 19, col = "darkorange", cex = 0.7)
+grid()
+
+plot(df1$FoulsC, df1$BallPoss,
+     main = "FoulsC vs BallPoss",
+     xlab = "FoulsC",
+     ylab = "BallPoss",
+     pch = 19, col = "darkorange", cex = 0.7)
+grid()
+
+
+
+
+
+##### regression diagnostic ######
+mod.out1 <- lm(df1$ShotsPrec~df1$PassPrec)
+par(mfrow=c(2,2))
+plot(mod.out1)
+par(mfrow=c(1,1))
 
 
 # count the number of outliers
